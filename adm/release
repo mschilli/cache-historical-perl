@@ -5,7 +5,7 @@ use Test::Harness;
 
 ModDevUtils::release() or exit 0;
 
-my $admdir = ".";
+my $admdir = "adm";
 runtests("$admdir/podok");
 
 my $ball = ModDevUtils::tarball_name();
