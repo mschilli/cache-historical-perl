@@ -142,7 +142,7 @@ sub get_interpolated {
                 @time_range = $self->time_range( $key );
                 last unless @time_range;
             }
-            if($time_range[0] lt $dt) {
+            if($time_range[0] and $time_range[0] lt $dt) {
                 $dt->subtract( days => 1 );
                 redo;
             }

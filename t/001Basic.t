@@ -41,3 +41,9 @@ is( $c->get_interpolated( $fmt->parse_datetime("2008-01-09"), "msft"), 34.61,
 
 is( $c->get_interpolated( $fmt->parse_datetime("2008-01-01"), "msft"), undef, 
     "get interpolated value" );
+
+is( $c->get_interpolated( $fmt->parse_datetime("2007-01-01"), "msft"), undef, 
+    "get interpolated value" );
+
+is( $c->get_interpolated( $fmt->parse_datetime("2009-01-01"), "twx"), undef, 
+    "get interpolated value" );
