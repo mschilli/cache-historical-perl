@@ -8,6 +8,7 @@ use File::Basename;
 use File::Path;
 use Log::Log4perl qw(:easy);
 use DBI;
+use DateTime::Format::Strptime;
 
 our $VERSION = "0.01";
 
@@ -127,6 +128,34 @@ sub get {
 }
 
 ###########################################
+sub get_interpolated {
+###########################################
+    my($self, $dt, $key) = @_;
+
+    my @time_range;
+    my $value;
+
+    {
+        $value = $self->get( $dt, $key );
+        if(! defined $value) {
+            if(! @time_range) {
+                @time_range = $self->time_range( $key );
+                last unless @time_range;
+            }
+            if($time_range[0] lt $dt) {
+                $dt->subtract( days => 1 );
+                redo;
+            }
+        }
+    };
+
+    return $value;
+}
+
+my $date_fmt = DateTime::Format::Strptime->new(
+                  pattern => "%Y-%m-%d %H:%M:%S");
+
+###########################################
 sub time_range {
 ###########################################
     my($self, $key) = @_;
@@ -136,6 +165,9 @@ sub time_range {
     my($from, $to) = $dbh->selectrow_array(
        "SELECT MIN(date), MAX(date) FROM vals WHERE key = " .
        $dbh->quote( $key ));
+
+    $from = $date_fmt->parse_datetime( $from );
+    $to   = $date_fmt->parse_datetime( $to );
 
     return($from, $to);
 }
