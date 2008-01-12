@@ -1,0 +1,207 @@
+###########################################
+package Cache::Historical;
+###########################################
+use strict;
+use warnings;
+use Rose::DB::Object::Loader;
+use File::Basename;
+use File::Path;
+use Log::Log4perl qw(:easy);
+use DBI;
+
+our $VERSION = "0.01";
+
+###########################################
+sub new {
+###########################################
+    my($class, %options) = @_;
+
+    my($home)     = glob "~";
+    my $default_cache_dir = "$home/.cache-historical";
+
+    my $self = {
+        sqlite_file => "$default_cache_dir/cache-historical.dat",
+        %options,
+    };
+
+    my $cache_dir = dirname( $self->{sqlite_file} );
+
+    if(! -d $cache_dir ) {
+        mkpath [ $cache_dir ] or
+            die "Cannot mktree $cache_dir ($!)";
+    }
+
+    bless $self, $class;
+
+    $self->{dsn} = "dbi:SQLite:dbname=$self->{sqlite_file}";
+
+    if(! -f $self->{sqlite_file}) {
+        $self->db_init();
+    }
+
+    my $loader =
+    Rose::DB::Object::Loader->new(
+        db_dsn        => $self->{dsn},
+        db_options    => { AutoCommit => 1, RaiseError => 1 },
+        class_prefix  => 'Cache::Historical',
+        with_managers => 1,
+    );
+
+    $loader->make_classes();
+
+    return $self;
+}
+
+###########################################
+sub db_init {
+###########################################
+    my($self) = @_;
+
+    my $dbh = DBI->connect($self->{dsn}, "", "");
+
+    DEBUG "Creating new SQLite db $self->{sqlite_file}";
+
+    $dbh->do(<<'EOT');
+CREATE TABLE vals (
+  id     INTEGER PRIMARY KEY,
+  date   DATETIME,
+  key    TEXT,
+  value  TEXT,
+  UNIQUE(date, key)
+);
+EOT
+
+    $dbh->do(<<'EOT');
+CREATE INDEX vals_date_idx ON vals(date);
+EOT
+
+    $dbh->do(<<'EOT');
+CREATE INDEX vals_key_idx ON vals(key);
+EOT
+
+    return 1;
+}
+
+###########################################
+sub set {
+###########################################
+    my($self, $dt, $key, $value) = @_;
+
+    my $r = Cache::Historical::Val->new();
+    $r->key( $key );
+    $r->date( $dt );
+    $r->load( speculative => 1 );
+    $r->value( $value );
+    $r->save();
+}
+
+###########################################
+sub get {
+###########################################
+    my($self, $dt, $key) = @_;
+
+    my $values = Cache::Historical::Val::Manager->get_vals(
+        query => [
+          date => $dt,
+          key  => $key,
+        ]
+    );
+
+    if(@$values) {
+        return $values->[0]->value();
+    }
+
+    return undef;
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+Cache::Historical - Cache historical values
+
+=head1 SYNOPSIS
+
+    use Cache::Historical;
+
+    my $cache = Cache::Historical->new();
+ 
+       # Set a key's value on a specific date
+    $cache->set( $dt, $key, $value );
+
+       # Get a key's value on a specific date
+    my $value = $cache->get( $dt, $key ); 
+
+       # List all keys
+    my @keys = $cache->keys();
+
+       # List the time range for which we have values for $key
+    my($from, $to) = $cache->time_range( $key );
+
+       # List all the values we have for $key, sorted by date
+       # ([$dt, $value], [$dt, $value], ...)
+    my @results = $cache->values( $key );
+
+       # Same as 'get', but if we don't have a value at $dt, but we 
+       # do have values for dates < $dt, return the previous 
+       # historic value. 
+    $cache->get_interpolated( $dt, $key );
+
+       # Remove all values for a specific key
+    $cache->clear( $key );
+
+       # Clear the entire cache
+    $cache->clear();
+
+=head1 DESCRIPTION
+
+Cache::Historical caches historical values by key and date. If you have
+something like historical stock quotes, for example
+
+    2008-01-02 msft 35.22
+    2008-01-03 msft 35.37
+    2008-01-04 msft 34.38
+    2008-01-07 msft 34.61
+
+then you can store them in Cache::Historical like
+
+    my $cache = Cache::Historical->new();
+
+    my $fmt = DateTime::Format::Strptime->new(
+                  pattern => "%Y-%m-%d");
+
+    $cache->set( $fmt->parse_datetime("2008-01-02"), "msft", 35.22 );
+    $cache->set( $fmt->parse_datetime("2008-01-03"), "msft", 35.37 );
+    $cache->set( $fmt->parse_datetime("2008-01-04"), "msft", 34.38 );
+    $cache->set( $fmt->parse_datetime("2008-01-07"), "msft", 34.61 );
+
+and retrieve them later by date:
+
+    my $dt = $fmt->parse_datetime("2008-01-03");
+
+      # Returns 35.37
+    my $value = $cache->get( $dt, "msft" );
+
+Even if there's no value available for a given date, but there are historical 
+values that predate the requested date, C<get_interpolated()> will return
+the next best historical value:
+
+    my $dt = $fmt->parse_datetime("2008-01-06");
+
+      # Returns undef, no value available for 2008-01-06
+    my $value = $cache->get( $dt, "msft" );
+
+      # Returns 34.48, the value for 2008-01-04, instead.
+    $value = $cache->get_interpolated( $dt, "msft" );
+
+=head1 LEGALESE
+
+Copyright 2007 by Mike Schilli, all rights reserved.
+This program is free software, you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 AUTHOR
+
+2007, Mike Schilli <cpan@perlmeister.com>
