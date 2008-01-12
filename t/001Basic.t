@@ -27,3 +27,7 @@ is( $c->get( $fmt->parse_datetime("2008-01-03"), "msft"), 35.37,
     "get value" );
 is( $c->get( $fmt->parse_datetime("2008-01-05"), "msft"), undef, 
     "get undef value" );
+
+my($from, $to) = $c->time_range( "msft" );
+is($from, "2008-01-02 00:00:00", "time range from");
+is($to,   "2008-01-07 00:00:00", "time range to");

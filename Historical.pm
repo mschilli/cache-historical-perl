@@ -53,11 +53,23 @@ sub new {
 }
 
 ###########################################
+sub dbh {
+###########################################
+    my($self) = @_;
+
+    if(! $self->{dbh} ) {
+        $self->{dbh} = DBI->connect($self->{dsn}, "", "");
+    }
+
+    return $self->{dbh};
+}
+
+###########################################
 sub db_init {
 ###########################################
     my($self) = @_;
 
-    my $dbh = DBI->connect($self->{dsn}, "", "");
+    my $dbh = $self->dbh();
 
     DEBUG "Creating new SQLite db $self->{sqlite_file}";
 
@@ -112,6 +124,20 @@ sub get {
     }
 
     return undef;
+}
+
+###########################################
+sub time_range {
+###########################################
+    my($self, $key) = @_;
+
+    my $dbh = $self->dbh();
+
+    my($from, $to) = $dbh->selectrow_array(
+       "SELECT MIN(date), MAX(date) FROM vals WHERE key = " .
+       $dbh->quote( $key ));
+
+    return($from, $to);
 }
 
 1;
