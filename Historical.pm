@@ -58,9 +58,10 @@ sub new {
 ###########################################
 sub make_modules {
 ###########################################
-    my($self) = @_;
+    my($self, @options) = @_;
 
-    $self->{loader}->make_modules( module_dir => "." );
+    DEBUG "Making modules in @options";
+    $self->{loader}->make_modules( @options );
 }
 
 ###########################################
@@ -110,6 +111,8 @@ sub set {
 ###########################################
     my($self, $dt, $key, $value) = @_;
 
+    DEBUG "Setting $dt $key => $value";
+
     my $r = Cache::Historical::Val->new();
     $r->key( $key );
     $r->date( $dt );
@@ -131,7 +134,9 @@ sub get {
     );
 
     if(@$values) {
-        return $values->[0]->value();
+        my $value = $values->[0]->value();
+        DEBUG "Getting $dt $key => $value";
+        return $value;
     }
 
     return undef;
@@ -180,6 +185,20 @@ sub time_range {
     $to   = $date_fmt->parse_datetime( $to );
 
     return($from, $to);
+}
+
+###########################################
+sub clear {
+###########################################
+    my($self, $key) = @_;
+
+    my @params = (all => 1);
+
+    if(defined $key) {
+        @params = ("where" => [ key => $key ]);
+    }
+
+    my $values = Cache::Historical::Val::Manager->delete_vals( @params );
 }
 
 1;

@@ -4,7 +4,7 @@ use strict;
 use Cache::Historical;
 use File::Temp qw(tempfile);
 use DateTime::Format::Strptime;
-use Test::More qw(no_plan);
+use Test::More tests => 12;
 
 my($fh, $tmpfile) = tempfile( UNLINK => 1 );
 unlink $tmpfile; # unlink so db gets initialized
@@ -22,7 +22,8 @@ $c->set( $fmt->parse_datetime("2008-01-03"), "msft", 35.37 );
 $c->set( $fmt->parse_datetime("2008-01-04"), "msft", 34.38 );
 $c->set( $fmt->parse_datetime("2008-01-07"), "msft", 34.61 );
 
-print "tempfile=$tmpfile", "\n";
+#print "tempfile=$tmpfile", "\n";
+
 is( $c->get( $fmt->parse_datetime("2008-01-03"), "msft"), 35.37, 
     "get value" );
 is( $c->get( $fmt->parse_datetime("2008-01-05"), "msft"), undef, 
@@ -47,3 +48,16 @@ is( $c->get_interpolated( $fmt->parse_datetime("2007-01-01"), "msft"), undef,
 
 is( $c->get_interpolated( $fmt->parse_datetime("2009-01-01"), "twx"), undef, 
     "get interpolated value" );
+
+$c->set( $fmt->parse_datetime("2008-01-02"), "twx", 35.22 );
+
+# clear
+$c->clear("msft");
+is( $c->get_interpolated( $fmt->parse_datetime("2009-01-01"), "msft"), undef, 
+    "get after clear" );
+is( $c->get_interpolated( $fmt->parse_datetime("2008-01-02"), "twx"), 35.22, 
+    "get after clear" );
+
+$c->clear();
+is( $c->get_interpolated( $fmt->parse_datetime("2009-01-02"), "twx"), undef, 
+    "get after clear" );
