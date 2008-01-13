@@ -87,10 +87,11 @@ sub db_init {
 
     $dbh->do(<<'EOT');
 CREATE TABLE vals (
-  id     INTEGER PRIMARY KEY,
-  date   DATETIME,
-  key    TEXT,
-  value  TEXT,
+  id       INTEGER PRIMARY KEY,
+  date     DATETIME,
+  upd_time DATETIME,
+  key      TEXT,
+  value    TEXT,
   UNIQUE(date, key)
 );
 EOT
@@ -116,6 +117,7 @@ sub set {
     my $r = Cache::Historical::Val->new();
     $r->key( $key );
     $r->date( $dt );
+    $r->upd_time( DateTime->now() );
     $r->load( speculative => 1 );
     $r->value( $value );
     $r->save();
@@ -143,10 +145,47 @@ sub get {
 }
 
 ###########################################
+sub last_update {
+###########################################
+    my($self, $key) = @_;
+
+    my @key = ();
+    @key = (key => $key) if defined $key;
+
+    my $values = Cache::Historical::Val::Manager->get_vals(
+        query => [ @key ],
+        sort_by => ['upd_time DESC'],
+        limit   => 1,
+    );
+
+    if(@$values) {
+        my $date = $values->[0]->upd_time();
+        return $date;
+    }
+
+    return undef;
+}
+
+###########################################
+sub since_last_update {
+###########################################
+    my($self, $key) = @_;
+
+    my $date = $self->last_update();
+
+    if(defined $date) {
+        return DateTime->now() - $date;
+    }
+
+    return undef;
+}
+
+###########################################
 sub get_interpolated {
 ###########################################
-    my($self, $dt, $key) = @_;
+    my($self, $dtp, $key) = @_;
 
+    my $dt = $dtp->clone(); # clone it because we might modify it
     my @time_range;
     my $value;
 
@@ -221,26 +260,10 @@ Cache::Historical - Cache historical values
        # Get a key's value on a specific date
     my $value = $cache->get( $dt, $key ); 
 
-       # List all keys
-    my @keys = $cache->keys();
-
-       # List the time range for which we have values for $key
-    my($from, $to) = $cache->time_range( $key );
-
-       # List all the values we have for $key, sorted by date
-       # ([$dt, $value], [$dt, $value], ...)
-    my @results = $cache->values( $key );
-
        # Same as 'get', but if we don't have a value at $dt, but we 
        # do have values for dates < $dt, return the previous 
        # historic value. 
     $cache->get_interpolated( $dt, $key );
-
-       # Remove all values for a specific key
-    $cache->clear( $key );
-
-       # Clear the entire cache
-    $cache->clear();
 
 =head1 DESCRIPTION
 
@@ -282,6 +305,45 @@ the next best historical value:
 
       # Returns 34.48, the value for 2008-01-04, instead.
     $value = $cache->get_interpolated( $dt, "msft" );
+
+=head2 Additional methods
+
+=over 4
+
+=item keys
+
+       # List all keys
+    my @keys = $cache->keys();
+
+=item time_range
+
+       # List the time range for which we have values for $key
+    my($from, $to) = $cache->time_range( $key );
+
+=item values
+
+       # List all the values we have for $key, sorted by date
+       # ([$dt, $value], [$dt, $value], ...)
+    my @results = $cache->values( $key );
+
+=item clear
+
+       # Remove all values for a specific key
+    $cache->clear( $key );
+
+       # Clear the entire cache
+    $cache->clear();
+
+=item last_update
+
+       # Return a DateTime object of the last update of a given key
+    my $when = $cache->last_update( $key );
+
+=item since_last_update
+
+       # Return a DateTime::Duration object since the time of the last
+       # update of a given key.
+    my $since = $cache->since_last_update( $key );
 
 =head1 LEGALESE
 
