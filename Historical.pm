@@ -50,7 +50,17 @@ sub new {
 
     $loader->make_classes();
 
+    $self->{loader} = $loader;
+
     return $self;
+}
+
+###########################################
+sub make_modules {
+###########################################
+    my($self) = @_;
+
+    $self->{loader}->make_modules( module_dir => "." );
 }
 
 ###########################################
