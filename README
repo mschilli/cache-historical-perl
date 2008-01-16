@@ -16,26 +16,10 @@ SYNOPSIS
            # Get a key's value on a specific date
         my $value = $cache->get( $dt, $key ); 
 
-           # List all keys
-        my @keys = $cache->keys();
-
-           # List the time range for which we have values for $key
-        my($from, $to) = $cache->time_range( $key );
-
-           # List all the values we have for $key, sorted by date
-           # ([$dt, $value], [$dt, $value], ...)
-        my @results = $cache->values( $key );
-
            # Same as 'get', but if we don't have a value at $dt, but we 
            # do have values for dates < $dt, return the previous 
            # historic value. 
         $cache->get_interpolated( $dt, $key );
-
-           # Remove all values for a specific key
-        $cache->clear( $key );
-
-           # Clear the entire cache
-        $cache->clear();
 
 DESCRIPTION
     Cache::Historical caches historical values by key and date. If you have
@@ -77,11 +61,41 @@ DESCRIPTION
           # Returns 34.48, the value for 2008-01-04, instead.
         $value = $cache->get_interpolated( $dt, "msft" );
 
+  Additional methods
+    keys
+               # List all keys
+            my @keys = $cache->keys();
+
+    time_range
+               # List the time range for which we have values for $key
+            my($from, $to) = $cache->time_range( $key );
+
+    values
+               # List all the values we have for $key, sorted by date
+               # ([$dt, $value], [$dt, $value], ...)
+            my @results = $cache->values( $key );
+
+    clear
+               # Remove all values for a specific key
+            $cache->clear( $key );
+
+               # Clear the entire cache
+            $cache->clear();
+
+    last_update
+               # Return a DateTime object of the last update of a given key
+            my $when = $cache->last_update( $key );
+
+    since_last_update
+               # Return a DateTime::Duration object since the time of the last
+               # update of a given key.
+            my $since = $cache->since_last_update( $key );
+
 LEGALESE
-    Copyright 2007 by Mike Schilli, all rights reserved. This program is
-    free software, you can redistribute it and/or modify it under the same
-    terms as Perl itself.
+        Copyright 2007 by Mike Schilli, all rights reserved. This program is
+        free software, you can redistribute it and/or modify it under the
+        same terms as Perl itself.
 
 AUTHOR
-    2007, Mike Schilli <cpan@perlmeister.com>
+        2007, Mike Schilli <cpan@perlmeister.com>
 

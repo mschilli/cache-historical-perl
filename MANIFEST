@@ -1,3 +1,4 @@
+adm/make_modules
 adm/podok
 Changes
 Historical.pm
@@ -6,3 +7,4 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 README
 t/001Basic.t
+t/002Timing.t
