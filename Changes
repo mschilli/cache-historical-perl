@@ -1,5 +1,9 @@
 ######################################################################
 Revision history for Perl extension Cache::Historical
 
+0.02  2008/01/23
+    (ms) Bumped up SQLite version number to 1.14 to get rid of 
+    'closing dbh with active statement handles' warning.
+
 0.01  2008/01/12
     (ms) Where it all began.
