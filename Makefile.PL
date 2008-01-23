@@ -7,7 +7,7 @@ WriteMakefile(
     'NAME'         => 'Cache::Historical',
     'VERSION_FROM' => 'Historical.pm', # finds $VERSION
     'PREREQ_PM'    => {
-                        DBD::SQLite              => 1.13,
+                        DBD::SQLite              => 1.14,
                         DBI                      => 0,
                         Rose::DB                 => 0.735,
                         Rose::DB::Object::Loader => 0.764,
