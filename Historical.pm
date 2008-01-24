@@ -171,7 +171,7 @@ sub since_last_update {
 ###########################################
     my($self, $key) = @_;
 
-    my $date = $self->last_update();
+    my $date = $self->last_update($key);
 
     if(defined $date) {
         return DateTime->now() - $date;

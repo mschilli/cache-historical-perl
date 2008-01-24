@@ -2,6 +2,9 @@
 Revision history for Perl extension Cache::Historical
 
 0.02  2008/01/23
+    (ms) Fixed bug with since_last_update(), which didn't pass the
+         key along to last_update().
+
     (ms) Bumped up SQLite version number to 1.14 to get rid of 
     'closing dbh with active statement handles' warning.
 
