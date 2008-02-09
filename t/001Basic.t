@@ -4,7 +4,7 @@ use strict;
 use Cache::Historical;
 use File::Temp qw(tempfile);
 use DateTime::Format::Strptime;
-use Test::More tests => 12;
+use Test::More tests => 15;
 
 my($fh, $tmpfile) = tempfile( UNLINK => 1 );
 unlink $tmpfile; # unlink so db gets initialized
@@ -51,6 +51,20 @@ is( $c->get_interpolated( $fmt->parse_datetime("2009-01-01"), "twx"), undef,
 
 $c->set( $fmt->parse_datetime("2008-01-02"), "twx", 35.22 );
 
+# keys/values
+
+my @values = $c->values('msft');
+my $str;
+for (@values) {
+    my($dt, $val) = @$_;
+    $str .= $dt->day() . " " . $val . " ";
+}
+is($str, "2 35.22 3 35.37 4 34.38 7 34.61 ", "values()");
+
+my @keys = $c->keys();
+is($keys[0], "msft", "keys()");
+is($keys[1], "twx",  "keys()");
+
 # clear
 $c->clear("msft");
 is( $c->get_interpolated( $fmt->parse_datetime("2009-01-01"), "msft"), undef, 
@@ -61,3 +75,4 @@ is( $c->get_interpolated( $fmt->parse_datetime("2008-01-02"), "twx"), 35.22,
 $c->clear();
 is( $c->get_interpolated( $fmt->parse_datetime("2009-01-02"), "twx"), undef, 
     "get after clear" );
+

@@ -10,7 +10,7 @@ use Log::Log4perl qw(:easy);
 use DBI;
 use DateTime::Format::Strptime;
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 ###########################################
 sub new {
@@ -126,13 +126,18 @@ sub set {
 ###########################################
 sub get {
 ###########################################
-    my($self, $dt, $key) = @_;
+    my($self, $dt, $key, $interpolate) = @_;
+
+    my @date_query = (date => $dt);
+    @date_query = (date => {le => $dt}) if $interpolate;
 
     my $values = Cache::Historical::Val::Manager->get_vals(
         query => [
-          date => $dt,
-          key  => $key,
-        ]
+          @date_query,
+          key   => $key,
+        ],
+        sort_by  => "date DESC",
+        limit => 1,
     );
 
     if(@$values) {
@@ -142,6 +147,45 @@ sub get {
     }
 
     return undef;
+}
+
+###########################################
+sub keys {
+###########################################
+    my($self) = @_;
+
+    my @keys;
+    my $keys = Cache::Historical::Val::Manager->get_vals(
+        distinct => 1,
+        select   => [ 'key' ],
+    );
+
+    for(@$keys) {
+        push @keys, $_->key();
+    }
+
+    return @keys;
+}
+
+###########################################
+sub values {
+###########################################
+    my($self, $key) = @_;
+
+    my @values = ();
+    my @key = ();
+    @key = (key => $key) if defined $key;
+
+    my $values = Cache::Historical::Val::Manager->get_vals(
+        query => [ @key ],
+        sort_by => ['upd_time DESC'],
+    );
+
+    for(@$values) {
+        push @values, [$_->date(), $_->value()];
+    }
+
+    return @values;
 }
 
 ###########################################
@@ -185,25 +229,7 @@ sub get_interpolated {
 ###########################################
     my($self, $dtp, $key) = @_;
 
-    my $dt = $dtp->clone(); # clone it because we might modify it
-    my @time_range;
-    my $value;
-
-    {
-        $value = $self->get( $dt, $key );
-        if(! defined $value) {
-            if(! @time_range) {
-                @time_range = $self->time_range( $key );
-                last unless @time_range;
-            }
-            if($time_range[0] and $time_range[0] lt $dt) {
-                $dt->subtract( days => 1 );
-                redo;
-            }
-        }
-    };
-
-    return $value;
+    return $self->get($dtp, $key, 1);
 }
 
 my $date_fmt = DateTime::Format::Strptime->new(
@@ -306,9 +332,25 @@ the next best historical value:
       # Returns 34.48, the value for 2008-01-04, instead.
     $value = $cache->get_interpolated( $dt, "msft" );
 
-=head2 Additional methods
+=head2 Methods
 
 =over 4
+
+=item new()
+
+Creates the object. Takes the SQLite file to put the date into as
+an additional parameter:
+
+    my $cache = Cache::Historical->new(
+        sqlite_file => "/tmp/mydata.dat",
+    );
+
+The SQLite file defaults to 
+
+    $HOME/.cache-historical/cache-historical.dat
+
+so if you have multiple caches, you need to use different
+SQLite files.
 
 =item keys
 
