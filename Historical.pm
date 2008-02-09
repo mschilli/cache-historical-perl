@@ -352,23 +352,23 @@ The SQLite file defaults to
 so if you have multiple caches, you need to use different
 SQLite files.
 
-=item keys
-
-       # List all keys
-    my @keys = $cache->keys();
-
-=item time_range
+=item time_range()
 
        # List the time range for which we have values for $key
     my($from, $to) = $cache->time_range( $key );
 
-=item values
+=item keys()
+
+       # List all keys
+    my @keys = $cache->keys();
+
+=item values()
 
        # List all the values we have for $key, sorted by date
        # ([$dt, $value], [$dt, $value], ...)
     my @results = $cache->values( $key );
 
-=item clear
+=item clear()
 
        # Remove all values for a specific key
     $cache->clear( $key );
@@ -376,12 +376,12 @@ SQLite files.
        # Clear the entire cache
     $cache->clear();
 
-=item last_update
+=item last_update()
 
        # Return a DateTime object of the last update of a given key
     my $when = $cache->last_update( $key );
 
-=item since_last_update
+=item since_last_update()
 
        # Return a DateTime::Duration object since the time of the last
        # update of a given key.
@@ -389,7 +389,7 @@ SQLite files.
 
 =head1 LEGALESE
 
-Copyright 2007 by Mike Schilli, all rights reserved.
+Copyright 2007-2008 by Mike Schilli, all rights reserved.
 This program is free software, you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

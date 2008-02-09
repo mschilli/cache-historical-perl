@@ -1,5 +1,5 @@
 ######################################################################
-    Cache::Historical 0.02
+    Cache::Historical 0.03
 ######################################################################
 
 NAME
@@ -61,40 +61,55 @@ DESCRIPTION
           # Returns 34.48, the value for 2008-01-04, instead.
         $value = $cache->get_interpolated( $dt, "msft" );
 
-  Additional methods
-    keys
-               # List all keys
-            my @keys = $cache->keys();
+  Methods
+    new()
+        Creates the object. Takes the SQLite file to put the date into as an
+        additional parameter:
 
-    time_range
+            my $cache = Cache::Historical->new(
+                sqlite_file => "/tmp/mydata.dat",
+            );
+
+        The SQLite file defaults to
+
+            $HOME/.cache-historical/cache-historical.dat
+
+        so if you have multiple caches, you need to use different SQLite
+        files.
+
+    time_range()
                # List the time range for which we have values for $key
             my($from, $to) = $cache->time_range( $key );
 
-    values
+    keys()
+               # List all keys
+            my @keys = $cache->keys();
+
+    values()
                # List all the values we have for $key, sorted by date
                # ([$dt, $value], [$dt, $value], ...)
             my @results = $cache->values( $key );
 
-    clear
+    clear()
                # Remove all values for a specific key
             $cache->clear( $key );
 
                # Clear the entire cache
             $cache->clear();
 
-    last_update
+    last_update()
                # Return a DateTime object of the last update of a given key
             my $when = $cache->last_update( $key );
 
-    since_last_update
+    since_last_update()
                # Return a DateTime::Duration object since the time of the last
                # update of a given key.
             my $since = $cache->since_last_update( $key );
 
 LEGALESE
-        Copyright 2007 by Mike Schilli, all rights reserved. This program is
-        free software, you can redistribute it and/or modify it under the
-        same terms as Perl itself.
+        Copyright 2007-2008 by Mike Schilli, all rights reserved. This
+        program is free software, you can redistribute it and/or modify it
+        under the same terms as Perl itself.
 
 AUTHOR
         2007, Mike Schilli <cpan@perlmeister.com>
