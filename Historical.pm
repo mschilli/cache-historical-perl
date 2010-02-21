@@ -387,9 +387,11 @@ SQLite files.
        # update of a given key.
     my $since = $cache->since_last_update( $key );
 
+=back
+
 =head1 LEGALESE
 
-Copyright 2007-2008 by Mike Schilli, all rights reserved.
+Copyright 2007-2010 by Mike Schilli, all rights reserved.
 This program is free software, you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
