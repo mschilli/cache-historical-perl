@@ -17,8 +17,9 @@ my $c = Cache::Historical->new(
 my $fmt = DateTime::Format::Strptime->new(
               pattern => "%Y-%m-%d");
 
-$c->set( $fmt->parse_datetime("2008-01-02"), "msft", 35.22 );
 $c->set( $fmt->parse_datetime("2008-01-03"), "msft", 35.37 );
+$c->set( $fmt->parse_datetime("2008-01-02"), "msft", 35.22 );
+sleep 1; # so the update time is never the same for all the rows
 $c->set( $fmt->parse_datetime("2008-01-04"), "msft", 34.38 );
 $c->set( $fmt->parse_datetime("2008-01-07"), "msft", 34.61 );
 

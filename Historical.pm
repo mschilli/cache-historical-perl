@@ -178,7 +178,7 @@ sub values {
 
     my $values = Cache::Historical::Val::Manager->get_vals(
         query => [ @key ],
-        sort_by => ['upd_time DESC'],
+        sort_by => ['date'],
     );
 
     for(@$values) {
