@@ -1,7 +1,9 @@
 ######################################################################
 Revision history for Perl extension Cache::Historical
 
-0.04  (not yet released)
+0.04  (2011/04/24)
+    (ms) Applied patch by Niko Tyni to correct values() sort order
+         (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=615882)
     (ms) Fixed POD error reported by Mats Erik Andersson
 
 0.03  2008/02/09
