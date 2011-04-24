@@ -31,8 +31,11 @@ is( $c->get( $fmt->parse_datetime("2008-01-05"), "msft"), undef,
     "get undef value" );
 
 my($from, $to) = $c->time_range( "msft" );
-is($from, "2008-01-02T00:00:00", "time range from");
-is($to,   "2008-01-07T00:00:00", "time range to");
+
+use Data::HexDump;
+
+is("$from", "2008-01-02T00:00:00", "time range from");
+is("$to",   "2008-01-07T00:00:00", "time range to");
 
 # interpolated
 is( $c->get_interpolated( $fmt->parse_datetime("2008-01-06"), "msft"), 34.38, 

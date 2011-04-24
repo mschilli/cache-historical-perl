@@ -2,6 +2,8 @@
 Revision history for Perl extension Cache::Historical
 
 0.04  (2011/04/24)
+    (ms) Stringifying DateTime object in test suite to make it
+         works with is() in perl-5.10.1
     (ms) Applied patch by Niko Tyni to correct values() sort order
          (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=615882)
     (ms) Fixed POD error reported by Mats Erik Andersson
