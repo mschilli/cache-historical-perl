@@ -10,7 +10,7 @@ use Log::Log4perl qw(:easy);
 use DBI;
 use DateTime::Format::Strptime;
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 ###########################################
 sub new {
@@ -391,7 +391,7 @@ SQLite files.
 
 =head1 LEGALESE
 
-Copyright 2007-2010 by Mike Schilli, all rights reserved.
+Copyright 2007-2011 by Mike Schilli, all rights reserved.
 This program is free software, you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
