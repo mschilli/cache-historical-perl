@@ -1,6 +1,9 @@
 ######################################################################
 Revision history for Perl extension Cache::Historical
 
+0.05  (2011/04/27)
+    (ms) Removed debugging leftover Data::HexDump.
+
 0.04  (2011/04/24)
     (ms) Stringifying DateTime object in test suite to make it
          works with is() in perl-5.10.1

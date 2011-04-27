@@ -32,8 +32,6 @@ is( $c->get( $fmt->parse_datetime("2008-01-05"), "msft"), undef,
 
 my($from, $to) = $c->time_range( "msft" );
 
-use Data::HexDump;
-
 is("$from", "2008-01-02T00:00:00", "time range from");
 is("$to",   "2008-01-07T00:00:00", "time range to");
 

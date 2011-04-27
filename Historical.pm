@@ -10,7 +10,7 @@ use Log::Log4perl qw(:easy);
 use DBI;
 use DateTime::Format::Strptime;
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 ###########################################
 sub new {
